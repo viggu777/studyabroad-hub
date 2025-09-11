@@ -95,7 +95,7 @@ const toolsData = [
 
 export default function Tools() {
   return (
-    <div className="bg-yellow-100 min-h-screen">
+    <div className="bg-gray-100 min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         {/* Page Header */}
         <div className="text-center">
@@ -127,7 +127,7 @@ export default function Tools() {
               <div className="mt-8">
                 <Link
                   to={tool.path}
-                  className="inline-block w-full text-center py-3 px-6 bg-yellow-1000 text-gray-900 rounded-lg font-bold hover:bg-yellow-600 transition-colors"
+                  className="inline-block w-full text-center py-3 px-6 bg-gray-100 text-gray-900 rounded-lg font-bold hover:bg-yellow-600 transition-colors"
                 >
                   {tool.ctaText}
                 </Link>

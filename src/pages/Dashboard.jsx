@@ -145,7 +145,7 @@ const Dashboard = () => {
             />
             <button
               type="submit"
-              className="w-full py-2 bg-yellow-1000 text-gray-900 font-bold rounded hover:bg-yellow-600"
+              className="w-full py-2 bg-gray-100 text-gray-900 font-bold rounded hover:bg-yellow-600"
             >
               Add University
             </button>
@@ -193,7 +193,7 @@ const Dashboard = () => {
             />
             <button
               type="submit"
-              className="w-full py-2 bg-yellow-1000 text-gray-900 font-bold rounded hover:bg-yellow-600"
+              className="w-full py-2 bg-gray-100 text-gray-900 font-bold rounded hover:bg-yellow-600"
             >
               Add Course
             </button>
