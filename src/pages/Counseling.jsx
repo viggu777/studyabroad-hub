@@ -65,7 +65,7 @@ const faqData = [
 
 export default function Counseling() {
   return (
-    <div className="bg-yellow-100">
+    <div className="bg-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         {/* Page Header */}
         <div className="text-center">
@@ -89,7 +89,7 @@ export default function Counseling() {
             >
               {plan.isFeatured && (
                 <div className="absolute top-0 -translate-y-1/2 left-1/2 -translate-x-1/2">
-                  <span className="inline-flex items-center px-4 py-1 rounded-full text-sm font-bold bg-yellow-1000 text-gray-900">
+                  <span className="inline-flex items-center px-4 py-1 rounded-full text-sm font-bold bg-gray-100 text-gray-900">
                     Most Popular
                   </span>
                 </div>
@@ -130,7 +130,7 @@ export default function Counseling() {
                 to="/auth"
                 className={`mt-10 block w-full py-3 px-6 rounded-lg text-center font-bold ${
                   plan.isFeatured
-                    ? "bg-yellow-1000 text-gray-900 hover:bg-yellow-600"
+                    ? "bg-gray-100 text-gray-900 hover:bg-yellow-600"
                     : "bg-gray-800 text-white hover:bg-gray-900"
                 }`}
               >

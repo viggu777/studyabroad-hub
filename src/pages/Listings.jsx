@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { db } from "../firebase/config";
 import { collection, getDocs } from "firebase/firestore";
+import { FiBookOpen } from "react-icons/fi";
 
 export default function Listings() {
   // State for the active tab
@@ -108,11 +109,12 @@ export default function Listings() {
       onClick={() => {
         setActiveTab(tabName);
         setSearchTerm("");
+        setCurrentPage(1);
       }}
-      className={`px-4 py-2 text-lg font-bold rounded-t-lg ${
+      className={`px-6 py-3 text-base font-bold transition-colors duration-300 ${
         activeTab === tabName
-          ? "bg-white text-yellow-600"
-          : "bg-gray-200 text-gray-600 hover:bg-gray-300"
+          ? "border-b-2 border-yellow-500 text-yellow-600"
+          : "text-gray-500 hover:text-gray-800"
       }`}
     >
       {label}
@@ -120,21 +122,25 @@ export default function Listings() {
   );
 
   return (
-    <div className="bg-yellow-100">
+    <div className="bg-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* --- Filter Sidebar --- */}
-          <aside className="lg:col-span-1 bg-white p-6 rounded-lg shadow-md h-fit">
-            <h2 className="text-2xl font-bold mb-6 text-gray-800">Filters</h2>
+          <aside className="lg:col-span-1 bg-white p-6 rounded-xl shadow-lg h-fit">
+            <h2 className="text-2xl font-bold mb-6 text-gray-800 border-b pb-4">
+              Filters
+            </h2>
             {activeTab === "universities" ? (
               <div className="space-y-6">
                 <div>
-                  <label className="font-semibold text-gray-700">Country</label>
+                  <label className="font-semibold text-gray-700 block mb-2">
+                    Country
+                  </label>
                   <select
                     name="country"
                     value={filters.country}
                     onChange={handleFilterChange}
-                    className="w-full mt-2 p-2 border rounded"
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500"
                   >
                     <option value="">All Countries</option>
                     <option value="USA">USA</option>
@@ -146,9 +152,12 @@ export default function Listings() {
                 <div>
                   <label
                     htmlFor="tuitionMax"
-                    className="font-semibold text-gray-700"
+                    className="font-semibold text-gray-700 block mb-2"
                   >
-                    Max Tuition: ${filters.tuitionMax.toLocaleString()}
+                    Max Tuition:{" "}
+                    <span className="font-bold text-yellow-600">
+                      ${filters.tuitionMax.toLocaleString()}
+                    </span>
                   </label>
                   <input
                     type="range"
@@ -159,21 +168,21 @@ export default function Listings() {
                     step="1000"
                     value={filters.tuitionMax}
                     onChange={handleFilterChange}
-                    className="w-full mt-2"
+                    className="w-full mt-2 accent-yellow-500"
                   />
                 </div>
-                <div className="flex items-center">
+                <div className="flex items-center pt-2">
                   <input
                     type="checkbox"
                     name="scholarships"
                     id="scholarships"
                     checked={filters.scholarships}
                     onChange={handleFilterChange}
-                    className="h-4 w-4 rounded"
+                    className="h-5 w-5 rounded accent-yellow-500"
                   />
                   <label
                     htmlFor="scholarships"
-                    className="ml-2 font-semibold text-gray-700"
+                    className="ml-3 font-semibold text-gray-700"
                   >
                     Scholarships Available
                   </label>
@@ -192,13 +201,15 @@ export default function Listings() {
           {/* --- Results Grid --- */}
           <main className="lg:col-span-3">
             {/* Tabs */}
-            <div className="flex space-x-1">
-              <TabButton tabName="universities" label="Universities" />
-              <TabButton tabName="courses" label="Courses" />
+            <div className="border-b border-gray-200">
+              <div className="flex space-x-2">
+                <TabButton tabName="universities" label="Universities" />
+                <TabButton tabName="courses" label="Courses" />
+              </div>
             </div>
 
             {/* Search and Sort Bar */}
-            <div className="bg-white p-4 rounded-b-lg rounded-r-lg shadow-md mb-6">
+            <div className="bg-white p-4 rounded-b-lg shadow-md mb-6">
               <input
                 type="text"
                 value={searchTerm}
@@ -206,7 +217,7 @@ export default function Listings() {
                 placeholder={`Search by ${
                   activeTab === "universities" ? "university" : "course"
                 } name...`}
-                className="w-full p-3 border rounded-lg"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500"
               />
               <p className="text-sm text-gray-600 mt-2">
                 Showing {listToPaginate.length} results
@@ -214,7 +225,9 @@ export default function Listings() {
             </div>
 
             {loading ? (
-              <p>Loading listings...</p>
+              <div className="text-center py-10">
+                <p>Loading listings...</p>
+              </div>
             ) : (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -222,12 +235,12 @@ export default function Listings() {
                     ? currentItems.map((uni) => (
                         <div
                           key={uni.id}
-                          className="bg-white p-6 rounded-lg shadow-lg border border-gray-100"
+                          className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col"
                         >
-                          <span className="text-xs font-semibold bg-gray-100 text-gray-700 py-1 px-3 rounded-full">
-                            {uni.ranking}
+                          <span className="text-xs font-semibold bg-gray-100 text-gray-700 py-1 px-3 rounded-full self-start">
+                            Rank: {uni.ranking}
                           </span>
-                          <h3 className="mt-4 text-xl font-bold text-gray-900">
+                          <h3 className="mt-4 text-xl font-bold text-gray-900 flex-grow">
                             {uni.name}
                           </h3>
                           <p className="mt-1 text-gray-500">{uni.country}</p>
@@ -247,7 +260,7 @@ export default function Listings() {
                           </div>
                           <Link
                             to={`/universities/${uni.id}`}
-                            className="mt-6 block w-full text-center py-3 px-4 bg-yellow-1000 text-gray-900 rounded-lg font-bold hover:bg-yellow-600"
+                            className="mt-6 block w-full text-center py-3 px-4 bg-yellow-500 text-white rounded-lg font-bold hover:bg-yellow-600 transition-colors"
                           >
                             View Details
                           </Link>
@@ -256,55 +269,44 @@ export default function Listings() {
                     : currentItems.map((course) => (
                         <div
                           key={course.id}
-                          className="bg-white p-6 rounded-lg shadow-lg border border-gray-100"
+                          className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col"
                         >
-                          <div className="flex items-center justify-center h-12 w-12 rounded-md bg-yellow-100 text-yellow-600">
-                            <svg
-                              className="h-6 w-6"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"
-                              />
-                            </svg>
+                          <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-gray-100 text-yellow-600">
+                            <FiBookOpen size={24} />
                           </div>
-                          <h3 className="mt-5 text-xl font-bold text-gray-900">
+                          <h3 className="mt-5 text-xl font-bold text-gray-900 flex-grow">
                             {course.name}
                           </h3>
                           <div className="mt-4 text-sm text-gray-600 space-y-2">
                             <p>
-                              <strong>Universities:</strong>{" "}
+                              <strong>Universities Offering:</strong>{" "}
                               {course.universities}
                             </p>
                             <p>
-                              <strong>Avg Salary:</strong> {course.avgSalary}
+                              <strong>Average Salary:</strong>{" "}
+                              {course.avgSalary}
                             </p>
                           </div>
-                          <a
-                            href="/listings"
-                            className="mt-6 block w-full text-center py-2 px-4 border border-yellow-500 rounded-md text-base font-semibold text-yellow-600 hover:bg-yellow-100"
+                          <Link
+                            to={`/courses/${course.id}`}
+                            className="mt-6 block w-full text-center py-2 px-4 border border-yellow-500 rounded-lg text-base font-semibold text-yellow-600 hover:bg-yellow-500 hover:text-white transition-colors"
                           >
                             Explore Programs
-                          </a>
+                          </Link>
                         </div>
                       ))}
                 </div>
 
                 {/* Pagination */}
                 <div className="mt-8 flex justify-center">
-                  <nav className="flex rounded-md shadow">
+                  <nav className="flex rounded-lg shadow-sm">
                     {Array.from({ length: totalPages }, (_, index) => (
                       <button
                         key={index + 1}
                         onClick={() => setCurrentPage(index + 1)}
-                        className={`px-4 py-2 border text-sm font-medium ${
+                        className={`px-4 py-2 border border-gray-300 text-sm font-medium transition-colors first:rounded-l-lg last:rounded-r-lg ${
                           currentPage === index + 1
-                            ? "bg-yellow-1000 text-gray-900"
+                            ? "bg-yellow-500 text-white border-yellow-500"
                             : "bg-white text-gray-700 hover:bg-gray-50"
                         }`}
                       >

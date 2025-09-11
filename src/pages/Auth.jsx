@@ -109,7 +109,7 @@ const Auth = () => {
           {error && <p className="text-red-500 text-sm text-center">{error}</p>}
           <button
             type="submit"
-            className="w-full py-2 px-4 bg-yellow-1000 hover:bg-yellow-600 text-gray-900 font-bold rounded-lg"
+            className="w-full py-2 px-4 bg-gray-100 hover:bg-yellow-600 text-gray-900 font-bold rounded-lg"
           >
             {isLogin ? "Login" : "Sign Up"}
           </button>
