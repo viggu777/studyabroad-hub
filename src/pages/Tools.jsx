@@ -8,7 +8,7 @@ const toolsData = [
     description:
       "Search our extensive database of scholarships and grants to find funding opportunities that match your profile and destination.",
     ctaText: "Find Scholarships",
-    path: "/tools/scholarships",
+    path: "/scholarships",
     icon: (
       <svg
         className="h-12 w-12"

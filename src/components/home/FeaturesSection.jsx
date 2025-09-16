@@ -80,6 +80,29 @@ const FeaturesSection = () => {
       borderColor: "border-yellow-200",
     },
   ];
+  const services = [
+    {
+      title: "Application Tracker",
+      description:
+        "Keep track of all your applications, deadlines, and requirements in one organized dashboard.",
+      icon: "📋",
+      gradient: "from-yellow-500 to-yellow-500",
+    },
+    {
+      title: "Expert Guidance",
+      description:
+        "Get personalized advice from education consultants and admission experts.",
+      icon: "👨‍🎓",
+      gradient: "from-amber-500 to-yellow-600",
+    },
+    {
+      title: "Visa Support",
+      description:
+        "Complete visa guidance with document checklists and application assistance.",
+      icon: "📄",
+      gradient: "bg-gray-500",
+    },
+  ];
 
   return (
     <section className="py-5 bg-gray-100 ">
@@ -107,6 +130,30 @@ const FeaturesSection = () => {
               <p className="text-gray-700 leading-relaxed">
                 {feature.description}
               </p>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-20">
+        {/* Services Section */}
+        <div className="grid gap-8 md:grid-cols-3 mb-20">
+          {services.map((service, index) => (
+            <div
+              key={index}
+              className="relative overflow-hidden p-8 rounded-2xl bg-white border-2 border-yellow-200 shadow-lg hover:shadow-2xl transition-all duration-300 group"
+            >
+              <div
+                className={`absolute top-0 right-0 w-20 h-20 bg-gradient-to-br ${service.gradient} opacity-10 rounded-full transform translate-x-8 -translate-y-8 group-hover:scale-150 transition-transform duration-500`}
+              ></div>
+              <div className="relative z-10">
+                <div className="text-4xl mb-4">{service.icon}</div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">
+                  {service.title}
+                </h3>
+                <p className="text-gray-700 leading-relaxed">
+                  {service.description}
+                </p>
+              </div>
             </div>
           ))}
         </div>

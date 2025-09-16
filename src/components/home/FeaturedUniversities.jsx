@@ -1,37 +1,18 @@
-// src/components/home/FeaturedUniversities.jsx
-
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { db } from "../../firebase/config";
 import { collection, getDocs, query, limit } from "firebase/firestore";
+import { FiMapPin, FiArrowRight } from "react-icons/fi";
+
+const UniversityCardSkeleton = () => (
+  <div className="bg-slate-800 rounded-xl shadow-lg overflow-hidden animate-pulse">
+    <div className="aspect-[4/5] bg-slate-700"></div>
+  </div>
+);
 
 const FeaturedUniversities = () => {
   const [universities, setUniversities] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  const services = [
-    {
-      title: "Application Tracker",
-      description:
-        "Keep track of all your applications, deadlines, and requirements in one organized dashboard.",
-      icon: "📋",
-      gradient: "from-yellow-500 to-yellow-500",
-    },
-    {
-      title: "Expert Guidance",
-      description:
-        "Get personalized advice from education consultants and admission experts.",
-      icon: "👨‍🎓",
-      gradient: "from-amber-500 to-yellow-600",
-    },
-    {
-      title: "Visa Support",
-      description:
-        "Complete visa guidance with document checklists and application assistance.",
-      icon: "📄",
-      gradient: "bg-gray-500",
-    },
-  ];
 
   useEffect(() => {
     const fetchUniversities = async () => {
@@ -55,113 +36,94 @@ const FeaturedUniversities = () => {
   }, []);
 
   return (
-    <>
-      <section className="bg-gray-100 py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Services Section */}
-          <div className="grid gap-8 md:grid-cols-3 mb-20">
-            {services.map((service, index) => (
-              <div
-                key={index}
-                className="relative overflow-hidden p-8 rounded-2xl bg-white border-2 border-yellow-200 shadow-lg hover:shadow-2xl transition-all duration-300 group"
-              >
-                <div
-                  className={`absolute top-0 right-0 w-20 h-20 bg-gradient-to-br ${service.gradient} opacity-10 rounded-full transform translate-x-8 -translate-y-8 group-hover:scale-150 transition-transform duration-500`}
-                ></div>
-                <div className="relative z-10">
-                  <div className="text-4xl mb-4">{service.icon}</div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">
-                    {service.title}
-                  </h3>
-                  <p className="text-gray-700 leading-relaxed">
-                    {service.description}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
+    <section className="bg-gray-100 py-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-8">
+          <h2 className="text-4xl font-extrabold text-gray-900  sm:text-5xl mb-4">
+            Featured Universities
+          </h2>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            Explore top-ranked institutions trusted by students and employers
+            worldwide.
+          </p>
+          <div className="w-24 h-1 bg-yellow-500 mx-auto mt-6"></div>
         </div>
-      </section>
-      <section className="bg-gray-900 py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Universities Section */}
-          <div className="text-center mb-12 ">
-            <h2 className="text-4xl font-extrabold text-white sm:text-5xl mb-4">
-              Featured Universities
-            </h2>
-            <p className="text-xl text-white max-w-2xl mx-auto">
-              Top-ranked institutions trusted by students worldwide.
-            </p>
-            <div className="w-24 h-1 bg-yellow-500 mx-auto mt-6"></div>
-          </div>
 
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            {loading ? (
-              <div className="col-span-full flex justify-center items-center py-12">
-                <div className="animate-spin rounded-full h-12 w-12 border-4 border-yellow-200 border-t-yellow-500"></div>
-              </div>
-            ) : (
-              universities.map((uni) => (
-                <div
-                  key={uni.id}
-                  className="bg-white p-6 rounded-2xl shadow-lg border-2 border-yellow-200 hover:shadow-2xl hover:border-yellow-300 transition-all duration-300 transform hover:-translate-y-2 group"
-                >
-                  <div className="flex justify-between items-start mb-4">
-                    <span className="inline-block text-xs font-semibold bg-yellow-500 text-white py-2 px-3 rounded-full shadow-md">
-                      #{uni.ranking} world ranking
-                    </span>
-                    <div className="h-8 w-8 bg-gradient-to-r from-yellow-400 to-yellow-400 rounded-full opacity-30 group-hover:opacity-100 transition-opacity duration-300 shadow-lg"></div>
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          {loading ? (
+            <>
+              <UniversityCardSkeleton />
+              <UniversityCardSkeleton />
+              <UniversityCardSkeleton />
+              <UniversityCardSkeleton />
+            </>
+          ) : (
+            universities.map((uni) => (
+              <Link
+                to={`/universities/${uni.id}`}
+                key={uni.id}
+                className="block group"
+              >
+                <div className="relative overflow-hidden rounded-xl shadow-lg transition-all duration-300 transform group-hover:-translate-y-2 group-hover:shadow-2xl group-hover:shadow-yellow-500/10">
+                  <div className="aspect-[4/5] w-full">
+                    <img
+                      src={
+                        uni.imageUrl ||
+                        "https://via.placeholder.com/400x500/1e293b/FFFFFF?text=Campus"
+                      }
+                      alt={uni.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">
-                    {uni.name}
-                  </h3>
-                  <p className="text-gray-600 mb-4 flex items-center">
-                    <svg
-                      className="h-4 w-4 mr-2 text-yellow-500"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                      />
-                    </svg>
-                    {uni.country}
-                  </p>
-                  <div className="space-y-3 mb-6">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Tuition:</span>
-                      <span className="font-semibold text-gray-900">
-                        {uni.tuition
-                          ? `$${uni.tuition.toLocaleString()}`
-                          : "N/A"}
-                      </span>
+
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+
+                  {uni.ranking && (
+                    <div className="absolute top-4 left-4 bg-black/50 backdrop-blur-sm text-yellow-400 text-xs font-bold py-1 px-3 rounded-full">
+                      World Rank #{uni.ranking}
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">
-                        Scholarships:
-                      </span>
-                      <span className="font-semibold text-green-700">
-                        {uni.scholarshipsAvailable} Available
-                      </span>
+                  )}
+
+                  <div className="absolute bottom-0 left-0 right-0 p-4 flex justify-between items-end">
+                    <div>
+                      <h3 className="text-lg font-bold text-white leading-tight">
+                        {uni.name}
+                      </h3>
+                      <p className="text-sm text-gray-300 flex items-center mt-1">
+                        <FiMapPin className="h-4 w-4 mr-1.5 text-gray-400" />
+                        {uni.country}
+                      </p>
                     </div>
+                    {uni.tuition && (
+                      <div className="text-right flex-shrink-0 ml-2">
+                        <p className="text-xs text-gray-400">Tuition/yr</p>
+                        <p className="text-lg font-bold text-yellow-400">
+                          ${uni.tuition.toLocaleString()}
+                        </p>
+                      </div>
+                    )}
                   </div>
-                  <a
-                    href={`/universities/${uni.id}`}
-                    className="block w-full text-center py-3 px-4 bg-yellow-500 text-white rounded-xl font-bold hover:from-yellow-600 hover:via-yellow-600 hover:to-yellow-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
-                  >
-                    View Details
-                  </a>
+
+                  <div className="absolute top-4 right-4 bg-slate-900/50 backdrop-blur-sm text-white p-2 rounded-full transform translate-x-16 group-hover:translate-x-0 transition-transform duration-300">
+                    <FiArrowRight />
+                  </div>
                 </div>
-              ))
-            )}
-          </div>
+              </Link>
+            ))
+          )}
         </div>
-      </section>
-    </>
+        {/* 
+        <div className="text-center mt-16">
+          <Link
+            to="/listings"
+            className="px-8 py-3 bg-yellow-500 text-slate-900 font-bold rounded-lg hover:bg-yellow-400 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-yellow-500/30"
+          >
+            Explore All Universities
+          </Link>
+        </div> */}
+      </div>
+    </section>
   );
 };
+
 export default FeaturedUniversities;
