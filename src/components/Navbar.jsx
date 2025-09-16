@@ -93,6 +93,10 @@ export default function Navbar() {
               <span>Tools</span>
               <span className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-yellow-400 to-orange-400 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
             </NavLink>
+            <NavLink to="/scholarships" className={navLinkClasses}>
+              <span>Scholarships</span>
+              <span className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-yellow-400 to-orange-400 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
+            </NavLink>
             <NavLink to="/counseling" className={navLinkClasses}>
               <span>Counseling</span>
               <span className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-yellow-400 to-orange-400 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
@@ -173,6 +177,13 @@ export default function Navbar() {
                 onClick={closeMobileMenu}
               >
                 Tools
+              </NavLink>
+              <NavLink
+                to="/scholarships"
+                className={mobileNavLinkClasses}
+                onClick={closeMobileMenu}
+              >
+                Scholarships
               </NavLink>
               <NavLink
                 to="/counseling"
