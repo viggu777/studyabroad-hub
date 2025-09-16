@@ -34,34 +34,34 @@ const PopularCourses = () => {
   const courseColors = [
     {
       gradient: "bg-yellow-500",
-      bg: "bg-white",
+      bg: "bg-gray-100",
       border: "border-yellow-200",
     },
     {
       gradient: "bg-yellow-500",
-      bg: "bg-white",
+      bg: "bg-gray-100",
       border: "border-amber-200",
     },
     {
       gradient: "bg-yellow-500",
-      bg: "bg-white",
+      bg: "bg-gray-100",
       border: "border-yellow-200",
     },
     {
       gradient: "bg-yellow-500",
-      bg: "bg-white",
+      bg: "bg-gray-100",
       border: "border-yellow-300",
     },
   ];
 
   return (
-    <section className="bg-gray-100 py-20">
+    <section className="bg-gray-900 py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-extrabold text-gray-900 sm:text-5xl mb-4">
+          <h2 className="text-4xl font-extrabold text-white sm:text-5xl mb-4">
             Popular Courses
           </h2>
-          <p className="text-xl text-gray-700 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-400 max-w-2xl mx-auto">
             Explore high-demand programs with excellent career prospects.
           </p>
           <div className="w-24 h-1 bg-yellow-500 mx-auto mt-6"></div>
