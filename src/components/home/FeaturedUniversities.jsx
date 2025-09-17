@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { db } from "../../firebase/config";
-import { collection, getDocs, query, limit } from "firebase/firestore";
+import { collection, getDocs, query } from "firebase/firestore";
 import { FiMapPin, FiArrowRight } from "react-icons/fi";
 
 const UniversityCardSkeleton = () => (
@@ -18,8 +18,7 @@ const FeaturedUniversities = () => {
     const fetchUniversities = async () => {
       try {
         const universitiesCollection = collection(db, "universities");
-        const q = query(universitiesCollection, limit(4));
-        const uniSnapshot = await getDocs(q);
+        const uniSnapshot = await getDocs(universitiesCollection);
         const uniList = uniSnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
@@ -48,7 +47,7 @@ const FeaturedUniversities = () => {
           </p>
           <div className="w-24 h-1 bg-yellow-500 mx-auto mt-6"></div>
         </div>
-
+        {/* limiting to only show top 4 universities */}
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {loading ? (
             <>
@@ -58,7 +57,7 @@ const FeaturedUniversities = () => {
               <UniversityCardSkeleton />
             </>
           ) : (
-            universities.map((uni) => (
+            universities.slice(0, 4).map((uni) => (
               <Link
                 to={`/universities/${uni.id}`}
                 key={uni.id}
@@ -112,15 +111,15 @@ const FeaturedUniversities = () => {
             ))
           )}
         </div>
-        {/* 
+
         <div className="text-center mt-16">
           <Link
-            to="/listings"
+            to="/universities"
             className="px-8 py-3 bg-yellow-500 text-slate-900 font-bold rounded-lg hover:bg-yellow-400 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-yellow-500/30"
           >
             Explore All Universities
           </Link>
-        </div> */}
+        </div>
       </div>
     </section>
   );

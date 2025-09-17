@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -17,7 +17,10 @@ import Tools from "./pages/Tools";
 import Counseling from "./pages/Counseling";
 import Auth from "./pages/Auth";
 import ScholarshipPage from "./pages/ScholarshipPage"; // Import the new ScholarshipPage
+import ErrorBoundary from "./components/ErrorBoundary";
 
+import UniversityDetailPage from "./pages/UniversityDetailPage";
+import CourseDetailPage from "./pages/CourseDetailPage";
 // --- ADDED: Import for the Admin Dashboard page ---
 import Dashboard from "./pages/Dashboard";
 
@@ -29,6 +32,9 @@ import VisaTracker from "./components/StudentDashboard/pages/VisaTracker";
 import Financials from "./components/StudentDashboard/pages/Financials";
 import EditProfile from "./components/StudentDashboard/pages/EditProfile";
 
+// --- TEMPORARY: Import the seed function ---
+import { seedUniversities } from "./firebase/seed";
+
 const AppInner = () => {
   const location = useLocation();
 
@@ -37,6 +43,13 @@ const AppInner = () => {
   // location.pathname.startsWith("/dashboard") ||
   // location.pathname.startsWith("/user-dashboard");
 
+  // --- TEMPORARY: Run the seeder on app load ---
+  // Make sure to remove this after your database is populated!
+  useEffect(() => {
+    // Uncomment the line below to run the seeder
+    // seedUniversities();
+  }, []);
+
   return (
     <>
       {<Navbar />}
@@ -44,7 +57,16 @@ const AppInner = () => {
         {/* Your existing public routes */}
         <Route path="/" element={<Home />} />
         <Route path="/universities" element={<UniversitiesPage />} />
+        <Route
+          path="/universities/:id"
+          element={
+            <ErrorBoundary>
+              <UniversityDetailPage />
+            </ErrorBoundary>
+          }
+        />
         <Route path="/courses" element={<CoursesPage />} />
+        <Route path="/courses/:id" element={<CourseDetailPage />} />
 
         <Route path="/tools" element={<Tools />} />
         <Route path="/scholarships" element={<ScholarshipPage />} />

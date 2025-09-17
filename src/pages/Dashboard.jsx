@@ -13,8 +13,9 @@ import axios from "axios";
 import { FiEdit, FiTrash2, FiX } from "react-icons/fi";
 
 // --- Reusable Edit Modal Component ---
-const EditModal = ({ isOpen, onClose, item, type, onSave }) => {
+const EditModal = ({ isOpen, onClose, item, onSave }) => {
   const [editData, setEditData] = useState(null);
+  const [newImageFile, setNewImageFile] = useState(null);
 
   useEffect(() => {
     // When a new item is passed from the parent, update the modal's state
@@ -32,13 +33,14 @@ const EditModal = ({ isOpen, onClose, item, type, onSave }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave(editData);
+    // Pass both the text data and the new image file (if any)
+    onSave(editData, newImageFile);
   };
 
   // --- FIX: Added optional chaining (?.) to safely access properties of editData ---
   // This prevents the "Cannot read properties of null" error.
-  const renderUniversityForm = () => (
-    <>
+  const renderForm = () => (
+    <div className="space-y-3">
       <input
         name="name"
         value={editData?.name || ""}
@@ -68,50 +70,61 @@ const EditModal = ({ isOpen, onClose, item, type, onSave }) => {
         placeholder="Tuition Fee ($)"
         className="w-full p-2 border rounded mb-2"
       />
-      <input
-        type="number"
-        name="scholarshipsAvailable"
-        value={editData?.scholarshipsAvailable || ""}
+      <textarea
+        name="description"
+        value={editData?.description || ""}
         onChange={handleChange}
-        placeholder="Scholarships Available"
-        className="w-full p-2 border rounded mb-2"
-      />
-    </>
-  );
-
-  const renderCourseForm = () => (
-    <>
-      <input
-        name="name"
-        value={editData?.name || ""}
-        onChange={handleChange}
-        placeholder="Course Name"
-        className="w-full p-2 border rounded mb-2"
+        placeholder="Description"
+        className="w-full p-2 border rounded"
+        rows="3"
       />
       <input
-        name="universities"
-        value={editData?.universities || ""}
+        name="location"
+        value={editData?.location || ""}
         onChange={handleChange}
-        placeholder="Universities Count"
-        className="w-full p-2 border rounded mb-2"
+        placeholder="Location (e.g., City, State)"
+        className="w-full p-2 border rounded"
       />
       <input
-        name="avgSalary"
-        value={editData?.avgSalary || ""}
+        name="courses"
+        value={editData?.courses || ""}
         onChange={handleChange}
-        placeholder="Average Salary"
-        className="w-full p-2 border rounded mb-2"
+        placeholder="Courses (comma-separated)"
+        className="w-full p-2 border rounded"
       />
-    </>
+      <input
+        name="requiredExams"
+        value={editData?.requiredExams || ""}
+        onChange={handleChange}
+        placeholder="Required Exams (e.g., SAT, IELTS)"
+        className="w-full p-2 border rounded"
+      />
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Update Image (optional)
+        </label>
+        {editData?.imageUrl && (
+          <img
+            src={editData.imageUrl}
+            alt="Current"
+            className="w-24 h-24 object-cover rounded-md my-2"
+          />
+        )}
+        <input
+          type="file"
+          onChange={(e) => setNewImageFile(e.target.files[0])}
+          accept="image/*"
+          className="w-full p-2 border rounded file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-yellow-50 file:text-yellow-700 hover:file:bg-yellow-100"
+        />
+      </div>
+    </div>
   );
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-lg">
-        <div className="flex justify-between items-center p-4 border-b">
-          <h3 className="text-xl font-bold text-gray-800">
-            Edit {type === "university" ? "University" : "Course"}
-          </h3>
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-lg flex flex-col max-h-[90vh]">
+        <div className="flex justify-between items-center p-4 border-b flex-shrink-0">
+          <h3 className="text-xl font-bold text-gray-800">Edit University</h3>
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-800"
@@ -119,8 +132,8 @@ const EditModal = ({ isOpen, onClose, item, type, onSave }) => {
             <FiX size={24} />
           </button>
         </div>
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          {type === "university" ? renderUniversityForm() : renderCourseForm()}
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto">
+          {renderForm()}
           <div className="flex justify-end space-x-3">
             <button
               type="button"
@@ -143,32 +156,28 @@ const EditModal = ({ isOpen, onClose, item, type, onSave }) => {
 };
 
 const Dashboard = () => {
-  const [uniImageFile, setUniImageFile] = useState(null);
-  const [courseImageFile, setCourseImageFile] = useState(null);
-  const [uniName, setUniName] = useState("");
-  const [uniCountry, setUniCountry] = useState("");
-  const [uniRanking, setUniRanking] = useState("");
-  const [uniTuition, setUniTuition] = useState("");
-  const [uniScholarships, setUniScholarships] = useState("");
-  const [courseName, setCourseName] = useState("");
-  const [courseUnis, setCourseUnis] = useState("");
-  const [courseSalary, setCourseSalary] = useState("");
+  const [university, setUniversity] = useState({
+    name: "",
+    country: "USA",
+    location: "",
+    ranking: "",
+    description: "",
+    tuition: "",
+    courses: "",
+    requiredExams: "",
+  });
+  const [imageFile, setImageFile] = useState(null);
   const [universities, setUniversities] = useState([]);
-  const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
-  const [editType, setEditType] = useState("");
+  const [editType, setEditType] = useState("university"); // Keep for now, might be useful later
 
   const fetchData = async () => {
     try {
       const uniSnapshot = await getDocs(collection(db, "universities"));
       setUniversities(
         uniSnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
-      );
-      const courseSnapshot = await getDocs(collection(db, "courses"));
-      setCourses(
-        courseSnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
       );
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -178,6 +187,11 @@ const Dashboard = () => {
   useEffect(() => {
     fetchData();
   }, []);
+
+  const handleFormChange = (e) => {
+    const { name, value } = e.target;
+    setUniversity((prev) => ({ ...prev, [name]: value }));
+  };
 
   const uploadToCloudinary = async (file) => {
     const formData = new FormData();
@@ -192,53 +206,28 @@ const Dashboard = () => {
 
   const handleAddUniversity = async (e) => {
     e.preventDefault();
-    if (!uniName || !uniCountry || !uniImageFile)
+    if (!university.name || !university.country || !imageFile)
       return toast.error("University Name, Country, and Image are required.");
     setLoading(true);
     try {
-      const imageUrl = await uploadToCloudinary(uniImageFile);
+      const imageUrl = await uploadToCloudinary(imageFile);
       await addDoc(collection(db, "universities"), {
-        name: uniName,
-        country: uniCountry,
-        ranking: uniRanking,
-        tuition: Number(uniTuition),
-        scholarshipsAvailable: Number(uniScholarships),
+        ...university,
+        tuition: Number(university.tuition) || 0,
         imageUrl: imageUrl,
       });
       toast.success("University added successfully!");
-      setUniName("");
-      setUniCountry("");
-      setUniRanking("");
-      setUniTuition("");
-      setUniScholarships("");
-      setUniImageFile(null);
-      e.target.reset();
-      fetchData();
-    } catch (error) {
-      toast.error(`Error: ${error.message}`);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleAddCourse = async (e) => {
-    e.preventDefault();
-    if (!courseName || !courseImageFile)
-      return toast.error("Course Name and Image are required.");
-    setLoading(true);
-    try {
-      const imageUrl = await uploadToCloudinary(courseImageFile);
-      await addDoc(collection(db, "courses"), {
-        name: courseName,
-        universities: courseUnis,
-        avgSalary: courseSalary,
-        imageUrl: imageUrl,
+      setUniversity({
+        name: "",
+        country: "USA",
+        location: "",
+        ranking: "",
+        description: "",
+        tuition: "",
+        courses: "",
+        requiredExams: "",
       });
-      toast.success("Course added successfully!");
-      setCourseName("");
-      setCourseUnis("");
-      setCourseSalary("");
-      setCourseImageFile(null);
+      setImageFile(null);
       e.target.reset();
       fetchData();
     } catch (error) {
@@ -254,13 +243,20 @@ const Dashboard = () => {
     setShowEditModal(true);
   };
 
-  const handleSaveChanges = async (updatedItem) => {
+  const handleSaveChanges = async (updatedItem, newImageFile) => {
     setLoading(true);
     const collectionName =
       editType === "university" ? "universities" : "courses";
     const docRef = doc(db, collectionName, updatedItem.id);
     try {
       const { id, ...dataToUpdate } = updatedItem;
+
+      // If a new image is provided, upload it and update the imageUrl
+      if (newImageFile) {
+        const newImageUrl = await uploadToCloudinary(newImageFile);
+        dataToUpdate.imageUrl = newImageUrl;
+      }
+
       await updateDoc(docRef, dataToUpdate);
       toast.success(`${editType} updated successfully!`);
       setShowEditModal(false);
@@ -299,7 +295,6 @@ const Dashboard = () => {
         isOpen={showEditModal}
         onClose={() => setShowEditModal(false)}
         item={currentItem}
-        type={editType}
         onSave={handleSaveChanges}
       />
       <div className="max-w-7xl mx-auto p-8 bg-gray-50 min-h-screen">
@@ -307,55 +302,91 @@ const Dashboard = () => {
           Admin Dashboard
         </h1>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          <div className="bg-white p-6 rounded-lg shadow-md">
+          <div className="bg-white p-6 rounded-lg shadow-md lg:col-span-2">
             <h2 className="text-2xl font-semibold mb-4 text-gray-700">
-              Manage Universities
+              Add/Edit University
             </h2>
             <form onSubmit={handleAddUniversity} className="space-y-4">
-              <input
-                type="text"
-                value={uniName}
-                onChange={(e) => setUniName(e.target.value)}
-                placeholder="University Name"
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input
+                  type="text"
+                  name="name"
+                  value={university.name}
+                  onChange={handleFormChange}
+                  placeholder="University Name"
+                  className="w-full p-2 border rounded"
+                  required
+                />
+                <select
+                  name="country"
+                  value={university.country}
+                  onChange={handleFormChange}
+                  className="w-full p-2 border rounded bg-white"
+                  required
+                >
+                  <option value="USA">USA</option>
+                  <option value="UK">UK</option>
+                  <option value="Canada">Canada</option>
+                  <option value="Australia">Australia</option>
+                  <option value="Germany">Germany</option>
+                  <option value="Other">Other</option>
+                </select>
+                <input
+                  type="text"
+                  name="location"
+                  value={university.location}
+                  onChange={handleFormChange}
+                  placeholder="Location (e.g., City, State)"
+                  className="w-full p-2 border rounded"
+                />
+                <input
+                  type="text"
+                  name="ranking"
+                  value={university.ranking}
+                  onChange={handleFormChange}
+                  placeholder="World Ranking (e.g., QS: #1)"
+                  className="w-full p-2 border rounded"
+                />
+                <input
+                  type="number"
+                  name="tuition"
+                  value={university.tuition}
+                  onChange={handleFormChange}
+                  placeholder="Tuition Fee (USD)"
+                  className="w-full p-2 border rounded"
+                />
+                <input
+                  type="text"
+                  name="requiredExams"
+                  value={university.requiredExams}
+                  onChange={handleFormChange}
+                  placeholder="Exams (e.g., SAT, IELTS)"
+                  className="w-full p-2 border rounded"
+                />
+              </div>
+              <textarea
+                name="description"
+                value={university.description}
+                onChange={handleFormChange}
+                placeholder="University Description"
                 className="w-full p-2 border rounded"
-                required
-              />
-              <input
-                type="text"
-                value={uniCountry}
-                onChange={(e) => setUniCountry(e.target.value)}
-                placeholder="Country"
+                rows="4"
+              ></textarea>
+              <textarea
+                name="courses"
+                value={university.courses}
+                onChange={handleFormChange}
+                placeholder="Popular Courses (comma-separated)"
                 className="w-full p-2 border rounded"
-                required
-              />
-              <input
-                type="text"
-                value={uniRanking}
-                onChange={(e) => setUniRanking(e.target.value)}
-                placeholder="World Ranking (e.g., #1)"
-                className="w-full p-2 border rounded"
-              />
-              <input
-                type="number"
-                value={uniTuition}
-                onChange={(e) => setUniTuition(e.target.value)}
-                placeholder="Tuition Fee ($)"
-                className="w-full p-2 border rounded"
-              />
-              <input
-                type="number"
-                value={uniScholarships}
-                onChange={(e) => setUniScholarships(e.target.value)}
-                placeholder="Scholarships Available (Number)"
-                className="w-full p-2 border rounded"
-              />
+                rows="2"
+              ></textarea>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   University Image *
                 </label>
                 <input
                   type="file"
-                  onChange={(e) => setUniImageFile(e.target.files[0])}
+                  onChange={(e) => setImageFile(e.target.files[0])}
                   accept="image/*"
                   className="w-full p-2 border rounded file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-yellow-50 file:text-yellow-700 hover:file:bg-yellow-100"
                 />
@@ -368,11 +399,14 @@ const Dashboard = () => {
                 {loading ? "Submitting..." : "Add University"}
               </button>
             </form>
-            <div className="mt-8">
-              <h3 className="text-lg font-semibold">
-                Existing Universities: {universities.length}
-              </h3>
-              <ul className="list-none mt-2 text-gray-600 h-48 overflow-y-auto">
+          </div>
+
+          <div className="bg-white p-6 rounded-lg shadow-md lg:col-span-2">
+            <h2 className="text-2xl font-semibold mb-4 text-gray-700">
+              Existing Universities ({universities.length})
+            </h2>
+            <div className="max-h-96 overflow-y-auto">
+              <ul className="list-none mt-2 text-gray-600">
                 {universities.map((uni) => (
                   <li
                     key={uni.id}
@@ -390,83 +424,6 @@ const Dashboard = () => {
                       </button>
                       <button
                         onClick={() => handleDelete(uni.id, "universities")}
-                        className="text-red-500 hover:text-red-700"
-                      >
-                        <FiTrash2 />
-                      </button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-2xl font-semibold mb-4 text-gray-700">
-              Manage Popular Courses
-            </h2>
-            <form onSubmit={handleAddCourse} className="space-y-4">
-              <input
-                type="text"
-                value={courseName}
-                onChange={(e) => setCourseName(e.target.value)}
-                placeholder="Course Name"
-                className="w-full p-2 border rounded"
-                required
-              />
-              <input
-                type="text"
-                value={courseUnis}
-                onChange={(e) => setCourseUnis(e.target.value)}
-                placeholder="Universities Count (e.g., 1250+)"
-                className="w-full p-2 border rounded"
-              />
-              <input
-                type="text"
-                value={courseSalary}
-                onChange={(e) => setCourseSalary(e.target.value)}
-                placeholder="Average Salary (e.g., $95,000)"
-                className="w-full p-2 border rounded"
-              />
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Course Image *
-                </label>
-                <input
-                  type="file"
-                  onChange={(e) => setCourseImageFile(e.target.files[0])}
-                  accept="image/*"
-                  className="w-full p-2 border rounded file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-yellow-50 file:text-yellow-700 hover:file:bg-yellow-100"
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-2 bg-yellow-500 text-white font-bold rounded hover:bg-yellow-600 disabled:bg-gray-400"
-              >
-                {loading ? "Submitting..." : "Add Course"}
-              </button>
-            </form>
-            <div className="mt-8">
-              <h3 className="text-lg font-semibold">
-                Existing Courses: {courses.length}
-              </h3>
-              <ul className="list-none mt-2 text-gray-600 h-48 overflow-y-auto">
-                {courses.map((course) => (
-                  <li
-                    key={course.id}
-                    className="flex justify-between items-center p-2 hover:bg-gray-100 rounded-md"
-                  >
-                    <span>{course.name}</span>
-                    <div className="space-x-2">
-                      <button
-                        onClick={() => handleEditClick(course, "course")}
-                        className="text-blue-500 hover:text-blue-700"
-                      >
-                        <FiEdit />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(course.id, "courses")}
                         className="text-red-500 hover:text-red-700"
                       >
                         <FiTrash2 />
