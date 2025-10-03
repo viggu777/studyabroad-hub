@@ -1,0 +1,19 @@
+.env
+
+# Ignore Google Cloud credentials
+Backend/serviceAccountKey.json
+
+.serviceAccountKey.json
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.code-workspace
+*.vscode-testing
