@@ -1,7 +1,7 @@
 .env
 
  # Ignore Google Cloud credentials
-Backend/serviceAccountKey.json
+serviceAccountKey.json
 
 .serviceAccountKey.json
 
