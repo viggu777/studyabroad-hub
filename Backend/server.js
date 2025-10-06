@@ -16,7 +16,6 @@ const port = process.env.PORT || 5001; // Use a different port from your React a
 
 // --- Middleware ---
 // Initialize Firebase Admin
-import admin from "firebase-admin";
 
 const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
 
