@@ -16,10 +16,14 @@ const port = process.env.PORT || 5001; // Use a different port from your React a
 
 // --- Middleware ---
 // Initialize Firebase Admin
-const serviceAccount = require("./serviceAccountKey.json");
+import admin from "firebase-admin";
+
+const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
+
 // Enable Cross-Origin Resource Sharing
 app.use(cors());
 // Enable parsing of JSON bodies
