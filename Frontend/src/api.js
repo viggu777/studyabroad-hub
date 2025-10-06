@@ -2,7 +2,10 @@ import axios from "axios";
 import { auth } from "./firebase/config.js";
 
 const apiClient = axios.create({
-  baseURL: "http://localhost:5001/api", // Your backend API URL
+  baseURL:
+    import.meta.env.MODE === "development"
+      ? "http://localhost:5001/api"
+      : "https://studyabroad-hub.onrender.com/api",
 });
 
 // Add a request interceptor to include the Firebase ID token
