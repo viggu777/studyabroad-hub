@@ -78,17 +78,41 @@ const UniversitiesPage = () => {
     other: true,
   });
 
+  // 🔹 NEW: courses grouped by university id
+  const [coursesByUniversity, setCoursesByUniversity] = useState({});
+
   useEffect(() => {
     async function fetchUniversities() {
       try {
-        const response = await apiClient.get("/universities");
-        console.log("API RESPONSE DATA:", response.data); // <-- ADD THIS LINE
-        const data = response.data || [];
-        setAllUniversities(data);
-        setFilteredUniversities(data); // Set initial filtered list
+        // 🔹 Fetch universities AND courses together
+        const [uniRes, courseRes] = await Promise.all([
+          apiClient.get("/universities"),
+          apiClient.get("/courses"),
+        ]);
+
+        const universities = uniRes.data || [];
+        const courses = courseRes.data || [];
+
+        // 🔹 Build a map: { [universityId]: [course, course, ...] }
+        const map = {};
+        courses.forEach((course) => {
+          // course.university can be an object (populated) or string (_id)
+          const uniId =
+            course.university && typeof course.university === "object"
+              ? course.university._id
+              : course.university;
+
+          if (!uniId) return;
+          if (!map[uniId]) map[uniId] = [];
+          map[uniId].push(course);
+        });
+
+        setCoursesByUniversity(map);
+        setAllUniversities(universities);
+        setFilteredUniversities(universities);
         setLoading(false);
       } catch (error) {
-        console.error("Error fetching universities:", error);
+        console.error("Error fetching universities/courses:", error);
         setLoading(false);
       }
     }
@@ -563,69 +587,76 @@ const UniversitiesPage = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-              {filteredUniversities.map((uni) => (
-                <div
-                  key={uni._id}
-                  className="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col hover:shadow-xl transition-shadow duration-300"
-                >
-                  <div className="relative">
-                    <div className="aspect-[16/10] w-full overflow-hidden">
-                      <img
-                        src={
-                          uni.imageUrl ||
-                          "https://via.placeholder.com/400x250/e2e8f0/94a3b8?text=University"
-                        }
-                        alt={uni.name}
-                        className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-                      />
-                    </div>
-                  </div>
-                  <div className="p-5 flex flex-col flex-grow">
-                    <h3 className="text-lg font-bold text-gray-900 mb-1 truncate">
-                      {uni.name}
-                    </h3>
-                    <p className="text-gray-600 mb-3 flex items-center text-sm">
-                      <FiMapPin className="h-4 w-4 mr-1.5 text-gray-400" />
-                      {uni.location}, {uni.country}
-                    </p>
-                    <p className="text-sm text-gray-500 mb-4 flex-grow">
-                      {(uni.description || "").substring(0, 70)}...
-                    </p>
-                    <div className="mb-4">
-                      <h4 className="text-xs font-bold text-gray-400 uppercase mb-2">
-                        Popular Courses
-                      </h4>
-                      <div className="flex flex-wrap gap-1.5">
-                        {(uni.courses || "")
-                          .split(",")
-                          .slice(0, 2)
-                          .map((course, i) => (
-                            <span
-                              key={i}
-                              className="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-1 rounded-full"
-                            >
-                              {course.trim()}
-                            </span>
-                          ))}
+              {filteredUniversities.map((uni) => {
+                // 🔹 Get courses for this university
+                const uniCourses = coursesByUniversity[uni._id] || [];
+
+                return (
+                  <div
+                    key={uni._id}
+                    className="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col hover:shadow-xl transition-shadow duration-300"
+                  >
+                    <div className="relative">
+                      <div className="aspect-[16/10] w-full overflow-hidden">
+                        <img
+                          src={
+                            uni.imageUrl ||
+                            "https://via.placeholder.com/400x250/e2e8f0/94a3b8?text=University"
+                          }
+                          alt={uni.name}
+                          className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                        />
                       </div>
                     </div>
-                    <div className="flex justify-between items-center border-t border-gray-200 pt-4 mt-auto">
-                      <Link
-                        to="/counseling"
-                        className="px-4 py-2 text-sm font-semibold text-yellow-600 bg-yellow-100 rounded-lg hover:bg-yellow-200 transition-colors duration-200"
-                      >
-                        Get Counselling
-                      </Link>
-                      <Link
-                        to={`/universities/${uni._id}`}
-                        className="px-4 py-2 text-sm font-semibold text-white bg-gray-800 rounded-lg hover:bg-gray-900 transition-colors duration-200"
-                      >
-                        Explore &rarr;
-                      </Link>
+                    <div className="p-5 flex flex-col flex-grow">
+                      <h3 className="text-lg font-bold text-gray-900 mb-1 truncate">
+                        {uni.name}
+                      </h3>
+                      <p className="text-gray-600 mb-3 flex items-center text-sm">
+                        <FiMapPin className="h-4 w-4 mr-1.5 text-gray-400" />
+                        {uni.location}, {uni.country}
+                      </p>
+                      <p className="text-sm text-gray-500 mb-4 flex-grow">
+                        {(uni.description || "").substring(0, 70)}...
+                      </p>
+                      <div className="mb-4">
+                        <h4 className="text-xs font-bold text-gray-400 uppercase mb-2">
+                          Popular Courses
+                        </h4>
+                        <div className="flex flex-wrap gap-1.5">
+                          {uniCourses.slice(0, 2).map((course, i) => (
+                            <span
+                              key={course._id || i}
+                              className="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-1 rounded-full"
+                            >
+                              {course.name}
+                            </span>
+                          ))}
+                          {uniCourses.length === 0 && (
+                            <span className="text-xs text-gray-400">
+                              No courses added yet
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-center border-t border-gray-200 pt-4 mt-auto">
+                        <Link
+                          to="/counseling"
+                          className="px-4 py-2 text-sm font-semibold text-yellow-600 bg-yellow-100 rounded-lg hover:bg-yellow-200 transition-colors duration-200"
+                        >
+                          Get Counselling
+                        </Link>
+                        <Link
+                          to={`/universities/${uni._id}`}
+                          className="px-4 py-2 text-sm font-semibold text-white bg-gray-800 rounded-lg hover:bg-gray-900 transition-colors duration-200"
+                        >
+                          Explore &rarr;
+                        </Link>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </main>

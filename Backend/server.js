@@ -4,7 +4,6 @@ const express = require("express");
 const admin = require("firebase-admin");
 const cors = require("cors");
 const mongoose = require("mongoose");
-const { MongoClient } = require("mongodb");
 
 // Import routes
 const authRoutes = require("./routes/auth.js");
@@ -12,9 +11,32 @@ const courseRoutes = require("./routes/courses");
 const universityRoutes = require("./routes/universities");
 
 const app = express();
-const port = process.env.PORT || 5001; // Use a different port from your React app
+const port = process.env.PORT || 5001;
+
+// --- Firebase Admin Init (works for both local & deploy) ---
+let serviceAccount;
+
+try {
+  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+    // 🔹 Deployment mode: JSON string in env
+    serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+    console.log("Using FIREBASE_SERVICE_ACCOUNT from env");
+  } else {
+    // 🔹 Local mode: use JSON file
+    serviceAccount = require("./serviceAccountKey.json");
+    console.log("Using local serviceAccountKey.json file");
+  }
+
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+  });
+} catch (err) {
+  console.error("Failed to initialize Firebase Admin:", err);
+  process.exit(1);
+}
 
 // --- Middleware ---
+<<<<<<< HEAD
 // Initialize Firebase Admin
 
 const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
@@ -24,8 +46,9 @@ admin.initializeApp({
 });
 
 // Enable Cross-Origin Resource Sharing
+=======
+>>>>>>> 257089e (Update frontend and backend with latest changes)
 app.use(cors());
-// Enable parsing of JSON bodies
 app.use(express.json());
 
 // --- MongoDB Connection ---
@@ -40,11 +63,7 @@ async function connectToMongo() {
 }
 
 // --- API Endpoints ---
-
-// Auth routes
 app.use("/api/auth", authRoutes);
-
-// Use resource routes
 app.use("/api/courses", courseRoutes);
 app.use("/api/universities", universityRoutes);
 

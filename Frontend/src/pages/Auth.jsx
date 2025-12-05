@@ -1,74 +1,51 @@
+// src/pages/Auth.jsx
+
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom"; // Import Link
 import { auth, db } from "../firebase/config";
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-} from "firebase/auth";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
 
 const Auth = () => {
-  const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleAuth = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
 
     try {
-      if (isLogin) {
-        // --- LOGIN LOGIC ---
-        const userCredential = await signInWithEmailAndPassword(
-          auth,
-          email,
-          password
-        );
-        const user = userCredential.user;
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const user = userCredential.user;
 
-        const userDocRef = doc(db, "users", user.uid);
-        const userDocSnap = await getDoc(userDocRef);
+      const userDocRef = doc(db, "users", user.uid);
+      const userDocSnap = await getDoc(userDocRef);
 
-        if (userDocSnap.exists() && userDocSnap.data().role === "admin") {
+      if (userDocSnap.exists()) {
+        const userData = userDocSnap.data();
+        if (userData.role === "admin") {
           navigate("/dashboard");
+        } else if (userData.role === "student") {
+          navigate("/user-dashboard"); // Redirect students to their dashboard
         } else {
-          navigate("/");
+          navigate("/"); // Default redirect
         }
       } else {
-        // --- SIGNUP LOGIC ---
-        const userCredential = await createUserWithEmailAndPassword(
-          auth,
-          email,
-          password
-        );
-        const user = userCredential.user;
-
-        await setDoc(doc(db, "users", user.uid), {
-          uid: user.uid,
-          email: user.email,
-          role: "user",
-        });
-
-        navigate("/");
+        navigate("/"); // Fallback if no user document
       }
     } catch (err) {
-      // **IMPROVED ERROR HANDLING**
-      // Log the detailed error to the console for debugging
-      console.error("Firebase Auth Error Code:", err.code);
-      console.error("Firebase Auth Error Message:", err.message);
-
-      // Provide a more user-friendly error message
+      console.error("Firebase Login Error:", err.code);
       if (
         err.code === "auth/invalid-credential" ||
         err.code === "auth/user-not-found"
       ) {
         setError("Invalid email or password. Please try again.");
-      } else if (err.code === "auth/email-already-in-use") {
-        setError("An account with this email address already exists.");
-      } else if (err.code === "auth/weak-password") {
-        setError("Password is too weak. It should be at least 6 characters.");
       } else {
         setError("An error occurred. Please try again.");
       }
@@ -76,12 +53,12 @@ const Auth = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+    <div className="flex items-center justify-center min-h-screen bg-gray-50 px-4">
       <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
         <h2 className="text-2xl font-bold text-center">
-          {isLogin ? "Login" : "Create an Account"}
+          Login to your Account
         </h2>
-        <form onSubmit={handleAuth} className="space-y-6">
+        <form onSubmit={handleLogin} className="space-y-6">
           <div>
             <label className="text-sm font-bold text-gray-600 block">
               Email
@@ -109,19 +86,19 @@ const Auth = () => {
           {error && <p className="text-red-500 text-sm text-center">{error}</p>}
           <button
             type="submit"
-            className="w-full py-2 px-4 bg-gray-100 hover:bg-yellow-600 text-gray-900 font-bold rounded-lg"
+            className="w-full py-2 px-4 bg-yellow-500 hover:bg-yellow-600 text-black font-bold rounded-lg"
           >
-            {isLogin ? "Login" : "Sign Up"}
+            Login
           </button>
         </form>
         <p className="text-center text-sm">
-          {isLogin ? "Don't have an account? " : "Already have an account? "}
-          <button
-            onClick={() => setIsLogin(!isLogin)}
-            className="text-yellow-600 hover:underline"
+          Don't have an account?{" "}
+          <Link
+            to="/signup-student"
+            className="text-yellow-600 hover:underline font-semibold"
           >
-            {isLogin ? "Sign Up" : "Login"}
-          </button>
+            Sign Up
+          </Link>
         </p>
       </div>
     </div>

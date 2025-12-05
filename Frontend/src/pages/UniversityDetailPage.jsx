@@ -9,7 +9,7 @@ import {
   FiBookOpen,
   FiUsers,
   FiStar,
-} from "react-icons/fi"; // apiClient was imported from react-icons/fi, which is incorrect. Assuming it's imported from your api.js file.
+} from "react-icons/fi";
 import apiClient from "../api";
 
 const UniversityDetailPage = () => {
@@ -18,6 +18,9 @@ const UniversityDetailPage = () => {
   const [university, setUniversity] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // 🔹 NEW: store courses that belong to this university
+  const [uniCourses, setUniCourses] = useState([]);
+
   useEffect(() => {
     // Only run the effect if the id is present
     if (!id) {
@@ -25,18 +28,38 @@ const UniversityDetailPage = () => {
       return;
     }
 
-    const fetchUniversity = async () => {
+    const fetchUniversityAndCourses = async () => {
       try {
-        const response = await apiClient.get(`/universities/${id}`);
-        setUniversity(response.data);
+        // Fetch university and all courses in parallel
+        const [uniRes, coursesRes] = await Promise.all([
+          apiClient.get(`/universities/${id}`),
+          apiClient.get("/courses"),
+        ]);
+
+        const uniData = uniRes.data;
+        setUniversity(uniData);
+
+        const allCourses = coursesRes.data || [];
+        const uniId = uniData._id;
+
+        // Filter courses that belong to this university
+        const filtered = allCourses.filter((course) => {
+          const courseUniId =
+            course.university && typeof course.university === "object"
+              ? course.university._id
+              : course.university;
+          return courseUniId === uniId;
+        });
+
+        setUniCourses(filtered);
       } catch (error) {
-        console.error("Error fetching university:", error);
+        console.error("Error fetching university or courses:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchUniversity();
+    fetchUniversityAndCourses();
   }, [id]);
 
   if (loading) {
@@ -71,10 +94,6 @@ const UniversityDetailPage = () => {
       </div>
     );
   }
-
-  const courseList = university.courses
-    ? university.courses.split(",").map((course) => course.trim())
-    : [];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -142,20 +161,21 @@ const UniversityDetailPage = () => {
                 <FiUsers className="mr-3 text-green-600" />
                 Popular Courses
               </h2>
-              {courseList.length > 0 ? (
+              {uniCourses.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {courseList.map((course, index) => (
-                    <div
-                      key={index}
+                  {uniCourses.map((course) => (
+                    <Link
+                      to={`/courses/${course._id}`}
+                      key={course._id}
                       className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-100 hover:shadow-md transition-shadow duration-200"
                     >
                       <div className="flex items-center">
                         <div className="w-2 h-2 bg-blue-600 rounded-full mr-3"></div>
                         <span className="text-gray-800 font-medium">
-                          {course}
+                          {course.name}
                         </span>
                       </div>
-                    </div>
+                    </Link>
                   ))}
                 </div>
               ) : (

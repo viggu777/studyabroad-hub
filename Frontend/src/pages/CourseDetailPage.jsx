@@ -8,6 +8,10 @@ import {
   FiBarChart2,
   FiBriefcase,
   FiUsers,
+  FiClock,
+  FiMapPin,
+  FiCalendar,
+  FiExternalLink,
 } from "react-icons/fi";
 
 const CourseDetailPage = () => {
@@ -17,7 +21,6 @@ const CourseDetailPage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // CORRECTED: Removed the incorrect ObjectId validation
     if (!id) {
       setLoading(false);
       return;
@@ -70,11 +73,31 @@ const CourseDetailPage = () => {
     );
   }
 
+  // If backend populates university, this will be an object
+  const uni =
+    course.university && typeof course.university === "object"
+      ? course.university
+      : null;
+
+  // Hero image: course image → university image → default
+  const heroImage =
+    course.imageUrl ||
+    uni?.imageUrl ||
+    "https://images.unsplash.com/photo-1543269865-cbf427effbad?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=400";
+
+  const formattedDeadline = course.applicationDeadline
+    ? new Date(course.applicationDeadline).toLocaleDateString()
+    : null;
+
+  const intakeText = Array.isArray(course.intakeTerms)
+    ? course.intakeTerms.join(", ")
+    : course.intakeTerms || "";
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Header with Navigation */}
       <div className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 py-4">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <button
             onClick={() => navigate(-1)}
             className="flex items-center text-gray-600 hover:text-yellow-600 transition-colors duration-200 group"
@@ -82,6 +105,14 @@ const CourseDetailPage = () => {
             <FiArrowLeft className="mr-2 group-hover:-translate-x-1 transition-transform duration-200" />
             <span className="font-medium">Back to Courses</span>
           </button>
+          {uni && (
+            <Link
+              to={`/universities/${uni._id}`}
+              className="text-sm text-blue-600 hover:underline"
+            >
+              View {uni.name}
+            </Link>
+          )}
         </div>
       </div>
 
@@ -90,10 +121,7 @@ const CourseDetailPage = () => {
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
           <div className="relative h-80 overflow-hidden">
             <img
-              src={
-                course.imageUrl ||
-                "https://images.unsplash.com/photo-1543269865-cbf427effbad?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=400"
-              }
+              src={heroImage}
               alt={course.name}
               className="w-full h-full object-cover"
             />
@@ -105,6 +133,19 @@ const CourseDetailPage = () => {
               <h1 className="text-4xl md:text-5xl font-bold text-white drop-shadow-lg">
                 {course.name}
               </h1>
+              <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-gray-100">
+                {course.level && (
+                  <span className="px-3 py-1 rounded-full bg-white/15 border border-white/20">
+                    🎓 {course.level}
+                  </span>
+                )}
+                {uni && (
+                  <span className="px-3 py-1 rounded-full bg-white/15 border border-white/20 flex items-center">
+                    <FiMapPin className="mr-1" />
+                    {uni.name}, {uni.country}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -120,8 +161,24 @@ const CourseDetailPage = () => {
               </h2>
               <p className="text-gray-700 leading-relaxed text-lg">
                 {course.description ||
-                  `Detailed information about the ${course.name} program will be available soon. This course is in the field of ${course.field} and is offered as a ${course.level} degree.`}
+                  `Detailed information about the ${
+                    course.name
+                  } program will be available soon. This course is in the field of ${
+                    course.field || "this area"
+                  } and is offered as a ${course.level || "degree"}.`}
               </p>
+
+              {course.courseUrl && (
+                <a
+                  href={course.courseUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center mt-6 px-4 py-2 rounded-lg bg-yellow-500 text-white font-semibold hover:bg-yellow-600 transition-colors"
+                >
+                  <FiExternalLink className="mr-2" />
+                  Visit Official Course Page
+                </a>
+              )}
             </div>
 
             {/* Career Prospects */}
@@ -130,14 +187,19 @@ const CourseDetailPage = () => {
                 <FiBriefcase className="mr-3 text-green-600" />
                 Career Prospects
               </h2>
-              <div className="bg-green-50 p-6 rounded-lg border border-green-100">
+              <div className="bg-green-50 p-6 rounded-lg border border-green-100 space-y-3">
                 <p className="text-gray-800 text-lg">
                   Graduates from this field can expect an average starting
-                  salary of around{" "}
+                  salary of{" "}
                   <span className="font-bold text-green-700">
                     {course.avgSalary || "N/A"}
                   </span>
                   .
+                </p>
+                <p className="text-gray-700">
+                  Common roles may include positions in{" "}
+                  {course.field || "this domain"}, depending on your
+                  specialization, university, and country of study.
                 </p>
               </div>
             </div>
@@ -151,6 +213,7 @@ const CourseDetailPage = () => {
                 Quick Information
               </h3>
               <div className="space-y-4">
+                {/* Degree Level */}
                 <div className="flex items-start">
                   <div className="bg-yellow-100 p-2 rounded-lg mr-4">
                     <FiBarChart2 className="text-yellow-600 text-lg" />
@@ -162,42 +225,95 @@ const CourseDetailPage = () => {
                     </p>
                   </div>
                 </div>
+
+                {/* University */}
                 <div className="flex items-start">
                   <div className="bg-blue-100 p-2 rounded-lg mr-4">
                     <FiUsers className="text-blue-600 text-lg" />
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-800">Offered In</p>
-                    {course.universities && course.universities.length > 0 ? (
-                      <ul className="list-disc list-inside text-blue-600">
-                        {course.universities.map((uni) => (
-                          <li key={uni._id} className="text-lg font-medium">
-                            <Link
-                              to={`/universities/${uni._id}`}
-                              className="hover:underline"
-                            >
-                              {uni.name}
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
+                    <p className="font-semibold text-gray-800">University</p>
+                    {uni ? (
+                      <Link
+                        to={`/universities/${uni._id}`}
+                        className="text-blue-600 font-medium text-lg hover:underline"
+                      >
+                        {uni.name}
+                        {uni.country ? ` (${uni.country})` : ""}
+                      </Link>
                     ) : (
                       <p className="text-gray-500 italic">
-                        Not offered at any university yet.
+                        University information not available.
                       </p>
                     )}
                   </div>
                 </div>
+
+                {/* Tuition */}
                 <div className="flex items-start">
                   <div className="bg-green-100 p-2 rounded-lg mr-4">
                     <FiDollarSign className="text-green-600 text-lg" />
                   </div>
                   <div>
                     <p className="font-semibold text-gray-800">
-                      Average Salary
+                      Tuition Fee (Approx.)
                     </p>
-                    <p className="text-green-600 font-bold text-lg">
-                      {course.avgSalary || "Contact for details"}
+                    <p className="text-green-700 font-bold text-lg">
+                      {course.tuition
+                        ? `${course.currency || ""} ${course.tuition}`
+                        : "Contact for fee details"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Duration & Mode */}
+                <div className="flex items-start">
+                  <div className="bg-purple-100 p-2 rounded-lg mr-4">
+                    <FiClock className="text-purple-600 text-lg" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-800">
+                      Duration & Mode
+                    </p>
+                    <p className="text-gray-700">
+                      {course.durationMonths
+                        ? `${course.durationMonths} months`
+                        : "Duration not specified"}
+                      {course.mode ? ` • ${course.mode}` : ""}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Intakes */}
+                <div className="flex items-start">
+                  <div className="bg-orange-100 p-2 rounded-lg mr-4">
+                    <FiCalendar className="text-orange-600 text-lg" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-800">Intake Terms</p>
+                    <p className="text-gray-700">
+                      {intakeText || "Intake information not available"}
+                    </p>
+                    {formattedDeadline && (
+                      <p className="text-sm text-gray-500 mt-1">
+                        Application deadline:{" "}
+                        <span className="font-medium">{formattedDeadline}</span>
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Scholarships */}
+                <div className="flex items-start">
+                  <div className="bg-teal-100 p-2 rounded-lg mr-4">
+                    <FiDollarSign className="text-teal-600 text-lg" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-800">Scholarships</p>
+                    <p className="text-gray-700">
+                      {course.scholarshipsAvailable
+                        ? "Scholarships are available for this program."
+                        : "Scholarship details not specified."}
                     </p>
                   </div>
                 </div>
@@ -208,8 +324,8 @@ const CourseDetailPage = () => {
             <div className="bg-gradient-to-br from-yellow-500 to-orange-500 rounded-xl shadow-lg p-6 text-white">
               <h3 className="text-xl font-bold mb-3">Find Your University</h3>
               <p className="text-yellow-100 mb-6">
-                Explore universities that offer this program and get expert
-                counseling.
+                Explore universities that offer programs like this and get
+                expert counseling for your study abroad journey.
               </p>
               <Link
                 to="/universities"

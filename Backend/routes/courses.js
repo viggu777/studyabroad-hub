@@ -2,11 +2,10 @@ const express = require("express");
 const router = express.Router();
 const authMiddleware = require("../middleware/firebaseAuthMiddleware");
 const Course = require("../models/Course");
-
 // GET all courses
 router.get("/", async (req, res) => {
   try {
-    const courses = await Course.find().populate("universities");
+    const courses = await Course.find().populate("university");
     res.json(courses);
   } catch (err) {
     console.error(err);
@@ -18,7 +17,7 @@ router.get("/", async (req, res) => {
 router.get("/:id", async (req, res) => {
   try {
     const course = await Course.findOne({ _id: req.params.id }).populate(
-      "universities"
+      "university"
     );
     if (!course) {
       return res.status(404).json({ message: "Course not found" });
@@ -33,8 +32,7 @@ router.get("/:id", async (req, res) => {
 // POST a new course
 router.post("/", authMiddleware, async (req, res) => {
   try {
-    // Ensure you generate a unique string _id on the client-side before sending
-    const newCourse = new Course(req.body);
+    const newCourse = new Course(req.body); // now has _id
     const course = await newCourse.save();
     res.status(201).json(course);
   } catch (err) {
@@ -47,10 +45,10 @@ router.post("/", authMiddleware, async (req, res) => {
 router.put("/:id", authMiddleware, async (req, res) => {
   try {
     const course = await Course.findOneAndUpdate(
-      { _id: req.params.id }, // The filter
-      req.body, // The update data
-      { new: true } // Options: return the updated document
-    ).populate("universities");
+      { _id: req.params.id },
+      req.body,
+      { new: true }
+    ).populate("university");
 
     if (!course) {
       return res.status(404).json({ message: "Course not found" });

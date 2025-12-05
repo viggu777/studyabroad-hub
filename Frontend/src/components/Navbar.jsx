@@ -89,10 +89,10 @@ export default function Navbar() {
               <span>Courses</span>
               <span className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-yellow-400 to-orange-400 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
             </NavLink>
-            {/* <NavLink to="/tools" className={navLinkClasses}>
-              <span>Tools</span>
+            <NavLink to="/dashboard" className={navLinkClasses}>
+              <span>Dashboard</span>
               <span className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-yellow-400 to-orange-400 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
-            </NavLink> */}
+            </NavLink>
             <NavLink to="/scholarships" className={navLinkClasses}>
               <span>Scholarships</span>
               <span className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-yellow-400 to-orange-400 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>

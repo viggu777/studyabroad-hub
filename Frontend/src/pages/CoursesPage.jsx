@@ -10,12 +10,14 @@ import {
 } from "react-icons/fi";
 
 const CourseCardSkeleton = () => (
-  <div className="bg-white p-6 rounded-xl shadow-md animate-pulse">
-    <div className="h-40 w-full bg-gray-200 rounded-lg mb-4"></div>
-    <div className="h-4 w-1/3 bg-gray-200 rounded-full mb-3"></div>
-    <div className="h-6 w-3/4 bg-gray-200 rounded mb-4"></div>
-    <div className="h-4 w-full bg-gray-200 rounded mb-2"></div>
-    <div className="h-4 w-full bg-gray-200 rounded"></div>
+  <div className="bg-white p-4 rounded-xl shadow-md animate-pulse flex gap-4">
+    <div className="h-24 w-32 bg-gray-200 rounded-lg"></div>
+    <div className="flex-1 space-y-2">
+      <div className="h-4 w-1/3 bg-gray-200 rounded-full"></div>
+      <div className="h-5 w-3/4 bg-gray-200 rounded"></div>
+      <div className="h-4 w-2/3 bg-gray-200 rounded"></div>
+      <div className="h-4 w-1/2 bg-gray-200 rounded"></div>
+    </div>
   </div>
 );
 
@@ -131,56 +133,93 @@ const CoursesPage = () => {
           Showing {filteredCourses.length} results
         </p>
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(6)].map((_, i) => (
               <CourseCardSkeleton key={i} />
             ))}
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {currentItems.map((course) => (
-                <Link
-                  to={`/courses/${course._id}`}
-                  key={course._id}
-                  className="block group"
-                >
-                  <div className="bg-white rounded-xl shadow-lg overflow-hidden transition-all duration-300 transform hover:-translate-y-1 hover:shadow-2xl">
-                    <div className="aspect-[16/10] w-full overflow-hidden">
-                      <img
-                        src={
-                          course.imageUrl ||
-                          "https://via.placeholder.com/400x250/e2e8f0/94a3b8?text=Course"
-                        }
-                        alt={course.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    </div>
-                    <div className="p-5">
-                      <p className="text-sm font-semibold text-yellow-600">
-                        {course.field || "General"}
-                      </p>
-                      <h3 className="text-lg font-bold text-gray-900 mt-1 mb-3 truncate group-hover:text-yellow-600 transition-colors">
-                        {course.name}
-                      </h3>
-                      <div className="space-y-2 text-sm border-t border-gray-200 pt-3">
-                        <p className="flex items-center text-gray-600">
-                          <FiUsers className="mr-2 text-gray-400" />{" "}
-                          <strong>Universities:</strong>
-                          <span className="ml-1">
-                            {course.universities?.length || 0}
-                          </span>
-                        </p>
-                        <p className="flex items-center text-gray-600">
-                          <FiDollarSign className="mr-2 text-gray-400" />{" "}
-                          <strong>Avg Salary:</strong>
-                          <span className="ml-1">{course.avgSalary}</span>
-                        </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {currentItems.map((course) => {
+                // If populated, university will be an object
+                const uni =
+                  course.university && typeof course.university === "object"
+                    ? course.university
+                    : null;
+
+                const imageSrc =
+                  course.imageUrl ||
+                  uni?.imageUrl ||
+                  "https://via.placeholder.com/300x200/e2e8f0/94a3b8?text=Course";
+
+                return (
+                  <Link
+                    to={`/courses/${course._id}`}
+                    key={course._id}
+                    className="block group"
+                  >
+                    <div className="bg-white rounded-xl shadow-lg overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl flex gap-4 p-4">
+                      {/* Small Thumbnail */}
+                      <div className="w-28 h-24 flex-shrink-0 overflow-hidden rounded-lg">
+                        <img
+                          src={imageSrc}
+                          alt={course.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      </div>
+
+                      {/* Content */}
+                      <div className="flex-1 flex flex-col justify-between">
+                        <div>
+                          <p className="text-xs font-semibold text-yellow-600 flex items-center gap-1">
+                            <FiBookOpen className="text-yellow-500" />
+                            {course.field || "General"}
+                          </p>
+                          <h3 className="text-base font-bold text-gray-900 mt-1 mb-1 line-clamp-2 group-hover:text-yellow-600 transition-colors">
+                            {course.name}
+                          </h3>
+                          <p className="text-xs text-gray-500 mb-1 line-clamp-1">
+                            {uni ? (
+                              <>
+                                {uni.name}
+                                {uni.country ? ` • ${uni.country}` : ""}
+                              </>
+                            ) : (
+                              "University info not available"
+                            )}
+                          </p>
+                        </div>
+
+                        <div className="mt-2 space-y-1 text-xs border-t border-gray-200 pt-2">
+                          <p className="flex items-center text-gray-600">
+                            <FiBarChart2 className="mr-1 text-gray-400" />
+                            <span className="font-semibold mr-1">Level:</span>
+                            <span>{course.level || "Not specified"}</span>
+                          </p>
+                          <p className="flex items-center text-gray-600">
+                            <FiDollarSign className="mr-1 text-gray-400" />
+                            <span className="font-semibold mr-1">Salary:</span>
+                            <span>{course.avgSalary || "N/A"}</span>
+                          </p>
+                          {course.tuition && (
+                            <p className="flex items-center text-gray-600">
+                              <FiDollarSign className="mr-1 text-gray-400" />
+                              <span className="font-semibold mr-1">
+                                Tuition:
+                              </span>
+                              <span>
+                                {course.currency ? `${course.currency} ` : ""}
+                                {course.tuition}
+                              </span>
+                            </p>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </Link>
-              ))}
+                  </Link>
+                );
+              })}
             </div>
             {totalPages > 1 && (
               <div className="mt-12 flex justify-center">
@@ -207,4 +246,5 @@ const CoursesPage = () => {
     </div>
   );
 };
+
 export default CoursesPage;

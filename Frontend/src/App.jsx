@@ -1,4 +1,6 @@
-import React, { useEffect } from "react";
+// src/pages/App.jsx
+
+import React from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -16,13 +18,15 @@ import CoursesPage from "./pages/CoursesPage";
 import Tools from "./pages/Tools";
 import Counseling from "./pages/Counseling";
 import Auth from "./pages/Auth";
-import ScholarshipPage from "./pages/ScholarshipPage"; // Import the new ScholarshipPage
+import ScholarshipPage from "./pages/ScholarshipPage";
 import ErrorBoundary from "./components/ErrorBoundary";
 
 import UniversityDetailPage from "./pages/UniversityDetailPage";
 import CourseDetailPage from "./pages/CourseDetailPage";
-// --- ADDED: Import for the Admin Dashboard page ---
 import Dashboard from "./pages/Dashboard";
+
+// --- ADDED: Import the new StudentSignup component ---
+import StudentSignup from "./pages/StudentSignup";
 
 // --- Imports for the Student Dashboard ---
 import StudentDashboardLayout from "./components/StudentDashboard/layout/StudentDashboardLayout";
@@ -35,14 +39,9 @@ import EditProfile from "./components/StudentDashboard/pages/EditProfile";
 const AppInner = () => {
   const location = useLocation();
 
-  // --- UPDATED: This now checks for both admin and user dashboards ---
-  // const isDashboardRoute =
-  // location.pathname.startsWith("/dashboard") ||
-  // location.pathname.startsWith("/user-dashboard");
-
   return (
     <>
-      {<Navbar />}
+      <Navbar /> {/* Navbar is already included */}
       <Routes>
         {/* Your existing public routes */}
         <Route path="/" element={<Home />} />
@@ -63,7 +62,10 @@ const AppInner = () => {
         <Route path="/counseling" element={<Counseling />} />
         <Route path="/auth" element={<Auth />} />
 
-        {/* --- ADDED: The route for the Admin Dashboard --- */}
+        {/* --- ADDED: The route for the new Student Signup page --- */}
+        <Route path="/signup-student" element={<StudentSignup />} />
+
+        {/* Admin Dashboard Route */}
         <Route
           path="/dashboard"
           element={
@@ -73,7 +75,7 @@ const AppInner = () => {
           }
         />
 
-        {/* This route now acts as the parent for the entire student dashboard */}
+        {/* Student Dashboard Routes */}
         <Route
           path="/user-dashboard"
           element={
@@ -82,9 +84,7 @@ const AppInner = () => {
             </ProtectedRoute>
           }
         >
-          {/* Default dashboard page */}
           <Route index element={<Navigate to="overview" replace />} />
-          {/* Nested pages for the student dashboard */}
           <Route path="overview" element={<StudentOverview />} />
           <Route path="saved-programs" element={<SavedPrograms />} />
           <Route path="visa-tracker" element={<VisaTracker />} />
@@ -92,7 +92,7 @@ const AppInner = () => {
           <Route path="profile" element={<EditProfile />} />
         </Route>
       </Routes>
-      {<Footer />}
+      <Footer /> {/* Footer is already included */}
     </>
   );
 };
@@ -100,7 +100,6 @@ const AppInner = () => {
 function App() {
   return (
     <Router>
-      {/* Assuming AuthProvider wraps your app elsewhere */}
       <AppInner />
     </Router>
   );
